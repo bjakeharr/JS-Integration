@@ -82,6 +82,14 @@ const NewPlace = () => {
 				errorText="Please enter a valid description of at least 5 characters."
 				onInput={inputHandler}
 			/>
+			<Input
+				id="address"
+				element="textarea"
+				label="Address"
+				validators={[VALIDATOR_REQUIRE()]}
+				errorText="Please enter a valid address."
+				onInput={inputHandler}
+			/>
 			<Button type="submit">ADD PLACE</Button>
 		</form>
 	);
