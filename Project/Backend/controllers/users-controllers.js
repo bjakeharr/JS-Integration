@@ -24,8 +24,16 @@ const DUMMY_USERS = [
 	},
 ];
 
-const getUsers = (req, res, next) => {
-	res.status(200).json({ users: DUMMY_USERS });
+const getUsers = async (req, res, next) => {
+	let users;
+	try {
+		users = await User.find({}, "-password");
+	} catch (err) {
+		const error = new HttpError("Could not locate requested users", 500);
+		return next(error);
+	}
+
+	res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
