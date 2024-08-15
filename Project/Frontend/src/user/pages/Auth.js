@@ -28,11 +28,6 @@ const Auth = () => {
 		false,
 	);
 
-	const AuthSubmitHandler = (event) => {
-		// event.preventdefault();
-		console.log(formState);
-		auth.login();
-	};
 	const SwitchModeHandler = () => {
 		if (!isLoginMode) {
 			setFormData(
@@ -57,6 +52,38 @@ const Auth = () => {
 		}
 		setIsLogin((prevMode) => !prevMode);
 	};
+
+	const AuthSubmitHandler = async (event) => {
+		event.preventDefault();
+
+		if (isLoginMode) {
+		} else {
+			try {
+				const response = await fetch(
+					"http://localhost:5000/api/users/signup",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							name: formState.inputs.name.value,
+							email: formState.inputs.email.value,
+							password: formState.inputs.password.value,
+						}),
+					},
+				);
+
+				const responseData = await response.json();
+				console.log(responseData);
+			} catch (err) {
+				console.log(err);
+			}
+		}
+
+		auth.login();
+	};
+
 	return (
 		<Card className="authentication">
 			<h2>Login Required</h2>
