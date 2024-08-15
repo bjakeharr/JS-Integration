@@ -43,7 +43,7 @@ const signup = async (req, res, next) => {
 			new HttpError("Invalid inputs. Please check your data.", 422),
 		);
 	}
-	const { name, email, password, places } = req.body;
+	const { name, email, password } = req.body;
 
 	let existingUser;
 	try {
@@ -69,7 +69,7 @@ const signup = async (req, res, next) => {
 		email,
 		image: "https://static.wikia.nocookie.net/megamitensei/images/2/28/Phantom_Thieves_Logo.png/revision/latest/scale-to-width-down/250?cb=20170528120634",
 		password,
-		places,
+		places: [],
 	});
 
 	try {
