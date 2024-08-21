@@ -6,7 +6,11 @@ import Button from "../../shared/components/FormElements/Button";
 import Modal from "../../shared/components/UIElements/Modal";
 import Map from "../../shared/components/UIElements/Map";
 import { AuthContext } from "../../shared/context/auth-context";
+import { useHttpClient } from "../../shared/hooks/http-hook";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 const PlaceItem = (props) => {
+	const { isLoading, error, sendRequest, clearError } = useHttpClient();
 	const auth = useContext(AuthContext);
 	const [showMap, setShowMap] = useState(false);
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -15,11 +19,21 @@ const PlaceItem = (props) => {
 	const closeMapHandler = () => setShowMap(false);
 	const showDeleteWarningHandler = () => setShowConfirmModal(true);
 	const cancelDeleteHandler = () => setShowConfirmModal(false);
-	const confirmDeleteHandler = () => {
+
+	const confirmDeleteHandler = async () => {
+		setShowConfirmModal(false);
+		try {
+			sendRequest(
+				`http://localhost:5000/api/places/${props.id}`,
+				"DELETE",
+			);
+			props.onDelete(props.id);
+		} catch (err) {}
 		console.log("DELETING...");
 	};
 	return (
 		<React.Fragment>
+			<ErrorModal error={error} onClear={clearError} />
 			<Modal
 				show={showMap}
 				onCancel={closeMapHandler}
@@ -54,6 +68,7 @@ const PlaceItem = (props) => {
 			</Modal>
 			<li className="place-item">
 				<Card className="place-item__content">
+					{isLoading && <LoadingSpinner asOverlay />}
 					<div className="place-item__image">
 						<img src={props.image} alt={props.title} />
 					</div>
