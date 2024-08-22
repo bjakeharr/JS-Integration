@@ -31,6 +31,7 @@ const PlaceItem = (props) => {
 		} catch (err) {}
 		console.log("DELETING...");
 	};
+
 	return (
 		<React.Fragment>
 			<ErrorModal error={error} onClear={clearError} />
