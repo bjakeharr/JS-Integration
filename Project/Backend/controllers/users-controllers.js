@@ -21,6 +21,7 @@ const signup = async (req, res, next) => {
 			new HttpError("Invalid inputs. Please check your data.", 422),
 		);
 	}
+
 	const { name, email, password } = req.body;
 
 	let existingUser;
@@ -45,10 +46,11 @@ const signup = async (req, res, next) => {
 	const createdUser = new User({
 		name,
 		email,
-		image: "https://static.wikia.nocookie.net/megamitensei/images/2/28/Phantom_Thieves_Logo.png/revision/latest/scale-to-width-down/250?cb=20170528120634",
+		image: req.file.path.replace(/\\/g, "/"),
 		password,
 		places: [],
 	});
+	console.log(req.file.path.replace(/\\/g, "/"));
 
 	try {
 		await createdUser.save();
