@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-
+const fs = require("fs");
 const mongoose = require("mongoose");
 const User = require("../models/user");
 const HttpError = require("../models/http-error");
@@ -71,7 +71,7 @@ const createPlace = async (req, res, next) => {
 		description,
 		address,
 		location: coordinates,
-		image: "https://www.esbnyc.com/sites/default/files/2020-01/ESB%20Day.jpg",
+		image: req.file.path.replace(/\\/g, "/"),
 		creator,
 	});
 
@@ -164,6 +164,7 @@ const deletePlace = async (req, res, next) => {
 		);
 		return next(error);
 	}
+	const imagePath = place.image;
 
 	try {
 		const sess = await mongoose.startSession();
@@ -176,6 +177,11 @@ const deletePlace = async (req, res, next) => {
 		const error = new HttpError("Unable to delete requested place", 500);
 		return next(error);
 	}
+
+	fs.unlink(imagePath, (err) => {
+		console.log(err);
+	});
+
 	res.status(200).json({ message: "Place deleted" });
 };
 
