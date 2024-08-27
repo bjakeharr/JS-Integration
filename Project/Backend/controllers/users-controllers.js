@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const getUsers = async (req, res, next) => {
 	let users;
@@ -73,8 +74,23 @@ const signup = async (req, res, next) => {
 		);
 		return next(error);
 	}
+	let token;
+	try {
+		token = jwt.sign(
+			{ userId: createdUser.id, email: createdUser.email },
+			"supersecret_dont_share",
+			{ expiresIn: "1h" },
+		);
+	} catch (err) {
+		const error = new HttpError("Could not validate session token", 500);
+		return next(error);
+	}
 
-	res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+	res.status(201).json({
+		user: createdUser.id,
+		email: createdUser.email,
+		token: token,
+	});
 };
 
 const login = async (req, res, next) => {
@@ -90,15 +106,45 @@ const login = async (req, res, next) => {
 		return next(error);
 	}
 
-	if (!existingUser || existingUser.password !== password) {
+	if (!existingUser) {
 		return next(
 			new HttpError("Invalid credentials, could not log you in.", 401),
 		);
 	}
 
+	let isValidPassword = false;
+	try {
+		isValidPassword = await bcrypt.compare(password, existingUser.password);
+	} catch (err) {
+		const error = new HttpError(
+			"Could not validate your credentials. Please try again.",
+		);
+		return next(error);
+	}
+
+	if (!isValidPassword) {
+		const error = new HttpError(
+			"Could not validate your credentials. Please try again.",
+		);
+		return next(error);
+	}
+
+	let token;
+	try {
+		token = jwt.sign(
+			{ userId: existingUser.id, email: existingUser.email },
+			"supersecret_dont_share",
+			{ expiresIn: "1h" },
+		);
+	} catch (err) {
+		const error = new HttpError("Could not validate session token", 500);
+		return next(error);
+	}
+
 	res.json({
-		message: "Logged in!",
-		user: existingUser.toObject({ getters: true }),
+		userId: existingUser.id,
+		email: existingUser.email,
+		token: token,
 	});
 };
 
