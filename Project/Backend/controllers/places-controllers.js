@@ -131,6 +131,14 @@ const updatePlaceById = async (req, res, next) => {
 		return next(error);
 	}
 
+	if (place.creator.toString() !== req.userData.userId) {
+		const error = new HttpError(
+			"Current user is not authorized to edit this entry",
+			401,
+		);
+		return next(error);
+	}
+
 	place.title = title;
 	place.description = description;
 
@@ -161,6 +169,14 @@ const deletePlace = async (req, res, next) => {
 		const error = new HttpError(
 			"Could not find place associated with provided id.",
 			404,
+		);
+		return next(error);
+	}
+
+	if (place.creator.id !== req.userData.userId) {
+		const error = new HttpError(
+			"Current user is not authorized to delete this entry",
+			401,
 		);
 		return next(error);
 	}
